@@ -187,9 +187,6 @@ dialog textarea{min-height:260px;font:12px/1.4 ui-monospace,Menlo,monospace}
     <div class="center">
       <div class="toolbar palette only-edit" id="palette" role="toolbar" aria-label="Drawing tools"></div>
       <div class="toolbar only-edit" id="editBar">
-        <label class="check" title="Wall and Floor fill a box: drag out a rectangle and it fills when you let go"><input type="checkbox" id="rectMode"> Rectangle</label>
-        <label class="check" title="Draw walls and floor on every layout at once. Use it for walls that never move."><input type="checkbox" id="paintAll"> Draw on all layouts</label>
-        <span class="sep"></span>
         <label class="check" title="Highlight tiles that differ from the previous layout: red becomes wall, teal opens up"><input type="checkbox" id="showDiff" checked> Changes</label>
         <label class="check" title="Show the previous layout’s walls as faint outlines"><input type="checkbox" id="showGhost"> Onion skin</label>
         <label class="check" title="Darken floor the player can’t walk to from the start in this layout"><input type="checkbox" id="showReach"> Show unreachable</label>
@@ -237,6 +234,11 @@ dialog textarea{min-height:260px;font:12px/1.4 ui-monospace,Menlo,monospace}
     </div>
 
     <aside class="right">
+      <section class="only-edit">
+        <h2>Tool settings</h2>
+        <label class="check" title="Wall and Floor fill a box: drag out a rectangle and it fills when you let go"><input type="checkbox" id="rectMode"> Rectangle</label>
+        <label class="check" title="Draw walls and floor on every layout at once. Use it for walls that never move."><input type="checkbox" id="paintAll"> Draw on all layouts</label>
+      </section>
       <section class="only-edit" id="inspector"></section>
       <section class="only-play" style="flex-direction:column">
         <h2>Playtest keys</h2>
@@ -710,9 +712,15 @@ $('#palette').innerHTML =
   Object.entries(TYPES).map(([k,t])=>toolBtn('place',k,t.name,`Place ${t.name.toLowerCase()}`)).join('') +
   '<span class="sep"></span>' +
   toolBtn('select','', 'Select','Select and move objects (3)') + toolBtn('remove','', 'Remove','Remove objects (4)');
+function setTool(tool, objType){
+  const leavingSelect = ui.tool==='select' && tool!=='select';
+  ui.tool=tool; if(objType) ui.objType=objType;
+  if(leavingSelect && ui.selected){ ui.selected=null; refreshInspector(); render(); }
+  refreshToolbar();
+}
 $('#palette').addEventListener('click', e=>{
   const b=e.target.closest('[data-tool]'); if(!b) return;
-  ui.tool=b.dataset.tool; if(b.dataset.obj) ui.objType=b.dataset.obj; refreshToolbar();
+  setTool(b.dataset.tool, b.dataset.obj);
 });
 ['showDiff','showGhost','showReach','showScreen'].forEach(id=>$('#'+id).addEventListener('change', render));
 $('#zoomIn').addEventListener('click',()=>{ ui.zoom=clamp(ui.zoom+4,10,60); render(); });
@@ -980,7 +988,7 @@ document.addEventListener('keydown', e=>{
   if(typing) return;
   if((e.metaKey||e.ctrlKey) && (e.key==='z'||e.key==='Z')){ e.preventDefault(); undo(); return; }
   const tools={'1':'wall','2':'floor','3':'select','4':'remove'};
-  if(tools[e.key]){ ui.tool=tools[e.key]; refreshToolbar(); return; }
+  if(tools[e.key]){ setTool(tools[e.key]); return; }
   if(e.key==='['||e.key===']'){ const n=lvl().layouts.length; ui.layout=(ui.layout+(e.key===']'?1:-1)+n)%n; refreshAll(); return; }
   if((e.key==='Delete'||e.key==='Backspace') && ui.selected){ e.preventDefault(); pushUndo(); lvl().objects=lvl().objects.filter(o=>o.id!==ui.selected); ui.selected=null; save(); refreshAll(); }
 });
