@@ -713,9 +713,9 @@ $('#palette').innerHTML =
   '<span class="sep"></span>' +
   toolBtn('select','', 'Select','Select and move objects (3)') + toolBtn('remove','', 'Remove','Remove objects (4)');
 function setTool(tool, objType){
-  const leavingSelect = ui.tool==='select' && tool!=='select';
+  const switched = tool!==ui.tool || (tool==='place' && !!objType && objType!==ui.objType);
   ui.tool=tool; if(objType) ui.objType=objType;
-  if(leavingSelect && ui.selected){ ui.selected=null; refreshInspector(); render(); }
+  if(switched && tool!=='select' && ui.selected){ ui.selected=null; refreshInspector(); render(); }
   refreshToolbar();
 }
 $('#palette').addEventListener('click', e=>{
