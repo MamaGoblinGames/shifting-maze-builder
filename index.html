@@ -957,7 +957,7 @@ function tryDoor(){
   if(!wrong){
     play.done=true;
     $('#resultTitle').textContent='The door grinds open';
-    $('#resultBody').textContent=`Level complete in ${fmtTime(play.t)}, ${play.steps} steps and ${play.shifts} shift${play.shifts===1?'':'s'}.`;
+    $('#resultBody').textContent=`Level complete in ${fmtTime(play.t)}, ${play.steps} steps, and ${play.shifts} shift${play.shifts===1?'':'s'}.`;
     $('#result').classList.add('show'); return;
   }
   const mode=$('#wrongResult').value;
