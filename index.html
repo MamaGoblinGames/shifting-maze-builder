@@ -234,10 +234,11 @@ dialog textarea{min-height:260px;font:12px/1.4 ui-monospace,Menlo,monospace}
     </div>
 
     <aside class="right">
-      <section class="only-edit">
+      <section class="only-edit" id="toolSettings">
         <h2>Tool settings</h2>
-        <label class="check" title="Wall and Floor fill a box: drag out a rectangle and it fills when you let go"><input type="checkbox" id="rectMode"> Rectangle</label>
-        <label class="check" title="Draw walls and floor on every layout at once. Use it for walls that never move."><input type="checkbox" id="paintAll"> Draw on all layouts</label>
+        <p class="muted" id="noToolSettings"></p>
+        <label class="check" data-tools="wall floor" title="Wall and Floor fill a box: drag out a rectangle and it fills when you let go"><input type="checkbox" id="rectMode"> Rectangle</label>
+        <label class="check" data-tools="wall floor" title="Draw walls and floor on every layout at once. Use it for walls that never move."><input type="checkbox" id="paintAll"> Draw on all layouts</label>
       </section>
       <section class="only-edit" id="inspector"></section>
       <section class="only-play" style="flex-direction:column">
@@ -684,6 +685,16 @@ function refreshToolbar(){
     const on = b.dataset.tool===ui.tool && (ui.tool!=='place' || b.dataset.obj===ui.objType);
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
+  refreshToolSettings();
+}
+function refreshToolSettings(){
+  let shown=0;
+  document.querySelectorAll('#toolSettings [data-tools]').forEach(el=>{
+    const fits = el.dataset.tools.split(' ').includes(ui.tool);
+    el.style.display = fits ? '' : 'none'; if(fits) shown++;
+  });
+  const name = ui.tool==='place' ? TYPES[ui.objType].name : {wall:'Wall',floor:'Floor',select:'Select',remove:'Remove'}[ui.tool];
+  const none=$('#noToolSettings'); none.textContent=`${name} has no settings.`; none.style.display = shown ? 'none' : '';
 }
 function refreshSide(){ refreshInspector(); refreshStats(); refreshCipher(); }
 function refreshAll(){ ui.layout=clamp(ui.layout,0,lvl().layouts.length-1); refreshLevelPanel(); refreshToolbar(); refreshSide(); render(); }
